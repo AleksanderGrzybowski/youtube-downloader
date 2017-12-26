@@ -73,4 +73,42 @@ public class AppControllerTest {
         
         verify(service, times(1)).beginDownload("http://link.com");
     }
+    
+    @Test
+    public void should_return_404_if_there_is_no_such_job_for_file_download() throws Exception {
+        when(service.findOne(1)).thenReturn(Optional.empty());
+        
+        mockMvc.perform(get("/api/jobs/1/download"))
+                .andExpect(status().isNotFound());
+    }
+    
+    @Test
+    public void should_return_404_if_there_is_no_fully_downloaded_file_yet_or_error() throws Exception {
+        when(service.findOne(1)).thenReturn(Optional.empty());
+    
+        mockMvc.perform(get("/api/jobs/1/download"))
+                .andExpect(status().isNotFound());
+        
+        when(service.findOne(1)).thenReturn(Optional.of(createDownloadJobDto(DownloadStatus.PENDING)));
+        
+        mockMvc.perform(get("/api/jobs/1/download"))
+                .andExpect(status().isNotFound());
+        
+        when(service.findOne(1)).thenReturn(Optional.of(createDownloadJobDto(DownloadStatus.ERROR)));
+    
+        mockMvc.perform(get("/api/jobs/1/download"))
+                .andExpect(status().isNotFound());
+    }
+    
+    @Test
+    public void should_download_existing_and_downloaded_movie_file_as_attachment() throws Exception {
+        when(service.findOne(1)).thenReturn(Optional.of(createDownloadJobDto(DownloadStatus.SUCCESS)));
+        
+        mockMvc.perform(get("/api/jobs/1/download"))
+                .andExpect(status().isOk());
+    }
+    
+    private static DownloadJobDto createDownloadJobDto(DownloadStatus error) {
+        return new DownloadJobDto(1, "", "", error);
+    }
 }
