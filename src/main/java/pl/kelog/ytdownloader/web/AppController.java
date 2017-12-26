@@ -4,11 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.kelog.ytdownloader.common.DownloadJobDto;
 import pl.kelog.ytdownloader.youtube.YoutubeService;
+
+import java.io.File;
 
 @RestController
 @ResponseBody
@@ -36,17 +40,33 @@ public class AppController {
         return youtubeService.beginDownload(dto.youtubeUrl);
     }
     
+    @RequestMapping(
+            value = "/api/jobs/{id}/download",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_OCTET_STREAM_VALUE
+    )
+    @ResponseBody
+    public ResponseEntity<FileSystemResource> getFile(@PathVariable("id") int id) {
+        return youtubeService.findOne(id)
+                .map(downloadJobDto -> new ResponseEntity<>(toResource(downloadJobDto), HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+    
+    private FileSystemResource toResource(DownloadJobDto downloadJobDto) {
+        return new FileSystemResource(new File(downloadJobDto.getFilename()));
+    }
+    
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class ThumbnailUrlDto {
+    private static class ThumbnailUrlDto {
         String thumbnailUrl;
     }
     
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class YoutubeUrlDto {
+    private static class YoutubeUrlDto {
         String youtubeUrl;
     }
 }
