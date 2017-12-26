@@ -2,8 +2,9 @@ package pl.kelog.ytdownloader;
 
 import lombok.extern.java.Log;
 import org.apache.commons.io.IOUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import pl.kelog.ytdownloader.job.DownloadJob;
+import pl.kelog.ytdownloader.job.DownloadJobRepository;
 
 import java.nio.charset.Charset;
 
@@ -11,29 +12,37 @@ import java.nio.charset.Charset;
 @Log
 public class YoutubeService {
     
-    private final String youtubeDlPath;
+    private final DownloadJobRepository downloadJobRepository;
+    private final AsyncYoutubeDownloader asyncYoutubeDownloader;
+    private final AppConfiguration appConfiguration;
     
-    public YoutubeService(@Value("${app.youtubeDlPath:#{null}}") String youtubeDlPath) throws Exception {
-        this.youtubeDlPath = (youtubeDlPath == null) ? "youtube-dl" : youtubeDlPath;
-        log.info("Using youtube-dl tool path: " + this.youtubeDlPath + ", testing if it works...");
-        
-        checkIfToolIsPresent();
+    public YoutubeService(
+            DownloadJobRepository downloadJobRepository,
+            AsyncYoutubeDownloader asyncYoutubeDownloader,
+            AppConfiguration appConfiguration
+    ) {
+        this.downloadJobRepository = downloadJobRepository;
+        this.asyncYoutubeDownloader = asyncYoutubeDownloader;
+        this.appConfiguration = appConfiguration;
     }
     
     public String getThumbnailUrl(String youtubeMovieLink) throws Exception {
-        Process process = new ProcessBuilder(youtubeDlPath, "--get-thumbnail", youtubeMovieLink).start();
-        process.waitFor();
-        ensureSuccessExitCode(process);
-    
-        return IOUtils.toString(process.getInputStream(), Charset.defaultCharset()).trim();
-    }
-    
-    private void checkIfToolIsPresent() throws Exception {
-        Process process = new ProcessBuilder(youtubeDlPath, "--version").start();
+        Process process = new ProcessBuilder(appConfiguration.getYoutubeDlPath(), "--get-thumbnail", youtubeMovieLink).start();
         process.waitFor();
         ensureSuccessExitCode(process);
         
-        log.info("youtube-dl works correctly, exit code " + process.exitValue());
+        return IOUtils.toString(process.getInputStream(), Charset.defaultCharset()).trim();
+    }
+    
+    public String beginDownload(String youtubeMovieLink) throws Exception {
+        DownloadJob jobInfo = downloadJobRepository.create();
+        jobInfo.setUrl(youtubeMovieLink);
+        jobInfo.setStatus(DownloadJob.DownloadStatus.PENDING);
+        downloadJobRepository.save(jobInfo);
+        
+        asyncYoutubeDownloader.beginDownload(jobInfo);
+        
+        return jobInfo.getId();
     }
     
     private void ensureSuccessExitCode(Process process) {

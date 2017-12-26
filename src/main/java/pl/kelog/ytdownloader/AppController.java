@@ -2,11 +2,9 @@ package pl.kelog.ytdownloader;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @ResponseBody
@@ -22,9 +20,32 @@ public class AppController {
         );
     }
     
+    @RequestMapping(value = "/api/jobs", method = RequestMethod.POST)
+    public JobIdDto beginDownload(@RequestBody YoutubeUrlDto dto) throws Exception {
+        String jobId = youtubeService.beginDownload(dto.youtubeUrl);
+        return new JobIdDto(
+                jobId
+        );
+    }
+    
     @Data
     @AllArgsConstructor
-    public class ThumbnailUrlDto {
-        final String thumbnailUrl;
+    @NoArgsConstructor
+    public static class ThumbnailUrlDto {
+        String thumbnailUrl;
+    }
+    
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class YoutubeUrlDto {
+        String youtubeUrl;
+    }
+    
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class JobIdDto {
+        String jobId;
     }
 }
