@@ -10,9 +10,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.kelog.ytdownloader.common.DownloadJobDto;
+import pl.kelog.ytdownloader.job.DownloadJob.DownloadStatus;
 import pl.kelog.ytdownloader.youtube.YoutubeService;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.util.Optional;
 
 @RestController
 @ResponseBody
@@ -46,10 +49,15 @@ public class AppController {
             produces = MediaType.APPLICATION_OCTET_STREAM_VALUE
     )
     @ResponseBody
-    public ResponseEntity<FileSystemResource> getFile(@PathVariable("id") int id) {
-        return youtubeService.findOne(id)
-                .map(downloadJobDto -> new ResponseEntity<>(toResource(downloadJobDto), HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    public ResponseEntity<FileSystemResource> getFile(@PathVariable("id") int id, HttpServletResponse response) {
+        Optional<DownloadJobDto> dto = youtubeService.findOne(id);
+        
+        if (dto.isPresent() && dto.get().status == DownloadStatus.SUCCESS) {
+            response.setHeader("Content-Disposition", "attachment; filename=download.mp4");
+            return new ResponseEntity<>(toResource(dto.get()), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
     
     private FileSystemResource toResource(DownloadJobDto downloadJobDto) {
