@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class DownloadJob {
     
-    private String id;
+    private int id;
     private String url;
     private String filename;
     private DownloadStatus status;
