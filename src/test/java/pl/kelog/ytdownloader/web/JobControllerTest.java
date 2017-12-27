@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import pl.kelog.ytdownloader.common.DownloadJobDto;
-import pl.kelog.ytdownloader.job.DownloadJob.DownloadStatus;
+import pl.kelog.ytdownloader.job.DownloadJob.Status;
 import pl.kelog.ytdownloader.youtube.YoutubeService;
 
 import java.util.Optional;
@@ -19,7 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
-public class AppControllerTest {
+public class JobControllerTest {
     
     private MockMvc mockMvc;
     private YoutubeService service;
@@ -27,24 +27,12 @@ public class AppControllerTest {
     @Before
     public void setup() {
         service = mock(YoutubeService.class);
-        mockMvc = standaloneSetup(new AppController(service)).build();
-    }
-    
-    @Test
-    public void should_return_link_to_thumbnail() throws Exception {
-        String youtubeLink = "https://www.youtube.com/watch?v=gGQ2xKSF5VA";
-        String thumbnailUrl = "https://i.ytimg.com/vi/gGQ2xKSF5VA/maxresdefault.jpg";
-        
-        when(service.getThumbnailUrl(youtubeLink)).thenReturn(thumbnailUrl);
-        
-        mockMvc.perform(get("/api/thumbnailUrl").param("url", youtubeLink))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.thumbnailUrl", is(thumbnailUrl)));
+        mockMvc = standaloneSetup(new JobController(service)).build();
     }
     
     @Test
     public void should_list_details_of_a_job() throws Exception {
-        DownloadJobDto dto = new DownloadJobDto(1, "http://link.com", "/tmp/abcd.mp4", DownloadStatus.PENDING);
+        DownloadJobDto dto = new DownloadJobDto(1, "http://link.com", "/tmp/abcd.mp4", Status.PENDING);
         when(service.findOne(1)).thenReturn(Optional.of(dto));
         
         mockMvc.perform(get("/api/jobs/1"))
@@ -52,7 +40,7 @@ public class AppControllerTest {
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.url", is("http://link.com")))
                 .andExpect(jsonPath("$.filename", is("/tmp/abcd.mp4")))
-                .andExpect(jsonPath("$.status", is(DownloadStatus.PENDING.toString())));
+                .andExpect(jsonPath("$.status", is(Status.PENDING.toString())));
     }
     
     @Test
@@ -89,12 +77,12 @@ public class AppControllerTest {
         mockMvc.perform(get("/api/jobs/1/download"))
                 .andExpect(status().isNotFound());
         
-        when(service.findOne(1)).thenReturn(Optional.of(createDownloadJobDto(DownloadStatus.PENDING)));
+        when(service.findOne(1)).thenReturn(Optional.of(createDownloadJobDto(Status.PENDING)));
         
         mockMvc.perform(get("/api/jobs/1/download"))
                 .andExpect(status().isNotFound());
         
-        when(service.findOne(1)).thenReturn(Optional.of(createDownloadJobDto(DownloadStatus.ERROR)));
+        when(service.findOne(1)).thenReturn(Optional.of(createDownloadJobDto(Status.ERROR)));
     
         mockMvc.perform(get("/api/jobs/1/download"))
                 .andExpect(status().isNotFound());
@@ -102,13 +90,13 @@ public class AppControllerTest {
     
     @Test
     public void should_download_existing_and_downloaded_movie_file_as_attachment() throws Exception {
-        when(service.findOne(1)).thenReturn(Optional.of(createDownloadJobDto(DownloadStatus.SUCCESS)));
+        when(service.findOne(1)).thenReturn(Optional.of(createDownloadJobDto(Status.SUCCESS)));
         
         mockMvc.perform(get("/api/jobs/1/download"))
                 .andExpect(status().isOk());
     }
     
-    private static DownloadJobDto createDownloadJobDto(DownloadStatus error) {
+    private static DownloadJobDto createDownloadJobDto(Status error) {
         return new DownloadJobDto(1, "", "", error);
     }
 }

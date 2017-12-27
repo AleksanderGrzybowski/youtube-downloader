@@ -11,6 +11,5 @@ public class YtdownloaderApplication {
     public static void main(String[] args) {
         SpringApplication.run(YtdownloaderApplication.class, args);
     }
-    
 }
 

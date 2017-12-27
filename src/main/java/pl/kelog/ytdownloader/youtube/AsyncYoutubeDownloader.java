@@ -6,12 +6,13 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import pl.kelog.ytdownloader.AppConfiguration;
 import pl.kelog.ytdownloader.job.DownloadJob;
-import pl.kelog.ytdownloader.job.DownloadJob.DownloadStatus;
+import pl.kelog.ytdownloader.job.DownloadJob.Status;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static java.util.Arrays.asList;
+import static pl.kelog.ytdownloader.util.Utils.ensureSuccessExitCode;
 
 /**
  * http://forum.spring.io/forum/spring-projects/container/106565-async-in-the-same-class
@@ -32,26 +33,19 @@ public class AsyncYoutubeDownloader {
                     "-o",
                     jobInfo.getFilename()
             );
-            log.info("Starting download process (id " + jobInfo.getId() + "): " + command + "...");
+            log.info("Starting download process " + jobInfo + ", command: " + command + "...");
             Process process = new ProcessBuilder(command).start();
             
             process.waitFor();
             ensureSuccessExitCode(process);
             
-            log.info("Download successful (id " + jobInfo.getId() + ").");
-            jobInfo.setStatus(DownloadStatus.SUCCESS);
+            jobInfo.setStatus(Status.SUCCESS);
+            log.info("Download successful: " + jobInfo + ".");
         } catch (Exception e) {
-            log.info("Download error (id " + jobInfo.getId() + ").");
-            jobInfo.setStatus(DownloadStatus.ERROR);
+            jobInfo.setStatus(Status.ERROR);
+            log.severe("Download error: " + jobInfo + ". " + e.getMessage());
         }
         
         return CompletableFuture.completedFuture(null);
-    }
-    
-    private void ensureSuccessExitCode(Process process) {
-        if (process.exitValue() != 0) {
-            log.severe("youtube-dl execution error - exit code " + process.exitValue());
-            throw new RuntimeException();
-        }
     }
 }

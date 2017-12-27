@@ -6,8 +6,9 @@ import org.springframework.stereotype.Service;
 import pl.kelog.ytdownloader.AppConfiguration;
 import pl.kelog.ytdownloader.common.DownloadJobDto;
 import pl.kelog.ytdownloader.job.DownloadJob;
-import pl.kelog.ytdownloader.job.DownloadJob.DownloadStatus;
+import pl.kelog.ytdownloader.job.DownloadJob.Status;
 import pl.kelog.ytdownloader.job.DownloadJobRepository;
+import pl.kelog.ytdownloader.util.Utils;
 
 import java.nio.charset.Charset;
 import java.nio.file.Paths;
@@ -41,7 +42,7 @@ public class YoutubeService {
                 youtubeMovieLink
         ).start();
         process.waitFor();
-        ensureSuccessExitCode(process);
+        Utils.ensureSuccessExitCode(process);
         
         String url = IOUtils.toString(process.getInputStream(), Charset.defaultCharset()).trim();
         log.info("Got thumbnail URL back: " + url + ".");
@@ -51,7 +52,7 @@ public class YoutubeService {
     public DownloadJobDto beginDownload(String youtubeMovieLink) {
         DownloadJob job = downloadJobRepository.create();
         job.setUrl(youtubeMovieLink);
-        job.setStatus(DownloadStatus.PENDING);
+        job.setStatus(Status.PENDING);
         
         String downloadedVideoFilename = Paths.get(
                 appConfiguration.getStoragePath(),
@@ -68,12 +69,6 @@ public class YoutubeService {
     }
     
     
-    private void ensureSuccessExitCode(Process process) {
-        if (process.exitValue() != 0) {
-            log.severe("youtube-dl execution error - exit code " + process.exitValue());
-            throw new RuntimeException();
-        }
-    }
     
     private static DownloadJobDto mapToDto(DownloadJob job) {
         return new DownloadJobDto(job.getId(), job.getUrl(), job.getFilename(), job.getStatus());
