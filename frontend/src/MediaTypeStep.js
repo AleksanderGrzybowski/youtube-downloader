@@ -17,6 +17,7 @@ export default class MediaTypeStep extends Component {
 
         return (
           <div>
+              <img src={this.props.thumbnailLink} width={100} height={100}/>
               <h3>Step 2: pick media type:</h3>
               <FormGroup>
                   <Checkbox

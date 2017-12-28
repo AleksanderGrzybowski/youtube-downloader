@@ -4,7 +4,7 @@ import { Button, FormControl, FormGroup, Glyphicon } from 'react-bootstrap';
 export default class LinkStep extends Component {
 
     render() {
-        const requestInProgessIcon = this.props.requestInProgess && <Glyphicon glyph="time"/>;
+        const requestInProgessIcon = this.props.requestInProgress && <Glyphicon glyph="time"/>;
         const button = (
           <Button 
             bsStyle="success" 
