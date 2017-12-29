@@ -1,13 +1,11 @@
-import React, { Component } from 'react';
-import { Button, FormControl, FormGroup, Glyphicon } from 'react-bootstrap';
+import React from 'react';
+import Spinner from './Spinner';
 
-export default class WaitStep extends Component {
-
-    render() {
-        return (
-          <div>
-              <h3>Please wait...</h3>
-          </div>
-        )
-    }
+export default function WaitStep() {
+    return (
+      <div>
+          <h1 className="text-center"><Spinner/></h1>
+          <h3 className="text-center">Please wait...</h3>
+      </div>
+    )
 }

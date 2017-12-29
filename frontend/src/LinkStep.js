@@ -1,35 +1,28 @@
-import React, { Component } from 'react';
-import { Button, FormControl, FormGroup, Glyphicon } from 'react-bootstrap';
+import React from 'react';
+import { FormControl, FormGroup } from 'react-bootstrap';
+import NextButton from './NextButton';
 
-export default class LinkStep extends Component {
+export default function LinkStep({requestInProgress, movieLink, onNext, onMovieLinkChange}) {
+    const nextButton = (
+      <NextButton
+        disabled={requestInProgress || movieLink.trim() === ''}
+        onClick={onNext}
+        showSpinner={requestInProgress}
+      />
+    );
 
-    render() {
-        const requestInProgessIcon = this.props.requestInProgress && <Glyphicon glyph="time"/>;
-        const button = (
-          <Button 
-            bsStyle="success" 
-            disabled={this.props.requestInProgress}
-            onClick={this.props.onNext}
-          >
-              Next {requestInProgessIcon}
-          </Button>
-        );
-
-        return (
-          <div>
-              <h3>Step 1: paste YouTube download link here:</h3>
-              <FormGroup
-                controlId="formBasicText"
-              >
-                  <FormControl
-                    type="text"
-                    value={this.props.movieLink}
-                    placeholder="Enter text"
-                    onChange={e => this.props.onMovieLinkChange(e.target.value)}
-                  />
-              </FormGroup>
-              {button}
-          </div>
-        )
-    }
+    return (
+      <div>
+          <h3>Step 1: paste YouTube download link here:</h3>
+          <FormGroup controlId="formBasicText">
+              <FormControl
+                type="text"
+                value={movieLink}
+                placeholder="YouTube URL"
+                onChange={e => onMovieLinkChange(e.target.value)}
+              />
+          </FormGroup>
+          {nextButton}
+      </div>
+    )
 }

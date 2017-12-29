@@ -1,42 +1,39 @@
-import React, { Component } from 'react';
-import { Button, Checkbox, FormGroup, Glyphicon } from 'react-bootstrap';
+import React from 'react';
+import { Button, ButtonGroup, Image } from 'react-bootstrap';
+import NextButton from './NextButton';
 
-export default class MediaTypeStep extends Component {
+export default function MediaTypeStep({requestInProgress, thumbnailLink, mediaType, onNext, onMediaTypeChange}) {
+    const nextButton = (
+      <NextButton
+        disabled={requestInProgress}
+        onClick={onNext}
+        showSpinner={requestInProgress}
+      />
+    );
 
-    render() {
-        const requestInProgessIcon = this.props.requestInProgess && <Glyphicon glyph="time"/>;
-        const button = (
-          <Button
-            bsStyle="success"
-            disabled={this.props.requestInProgress}
-            onClick={this.props.onNext}
-          >
-              Next {requestInProgessIcon}
-          </Button>
-        );
-
-        return (
-          <div>
-              <img src={this.props.thumbnailLink} width={100} height={100}/>
-              <h3>Step 2: pick media type:</h3>
-              <FormGroup>
-                  <Checkbox
-                    value="video"
-                    checked={this.props.mediaType === 'video'}
-                    onChange={e => this.props.onMediaTypeChange(e.target.value)}
+    return (
+      <div>
+          <Image className="center-block" src={thumbnailLink} style={{maxWidth: 500}}/>
+          <h3>Step 2: pick what to download:</h3>
+          <ButtonGroup justified style={{marginBottom: '10px'}}>
+              <ButtonGroup>
+                  <Button
+                    bsStyle={mediaType === 'video' ? 'primary' : 'default'}
+                    onClick={() => onMediaTypeChange('video')}
                   >
-                      Video
-                  </Checkbox>
-                  <Checkbox
-                    value="audio"
-                    checked={this.props.mediaType === 'audio'}
-                    onChange={e => this.props.onMediaTypeChange(e.target.value)}
+                      Video (mp4)
+                  </Button>
+              </ButtonGroup>
+              <ButtonGroup>
+                  <Button
+                    bsStyle={mediaType === 'audio' ? 'primary' : 'default'}
+                    onClick={() => onMediaTypeChange('audio')}
                   >
-                      Audio
-                  </Checkbox>
-              </FormGroup>
-              {button}
-          </div>
-        )
-    }
+                      Just audio (mp3)
+                  </Button>
+              </ButtonGroup>
+          </ButtonGroup>
+          {nextButton}
+      </div>
+    )
 }

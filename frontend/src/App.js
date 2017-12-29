@@ -6,6 +6,7 @@ import MediaTypeStep from './MediaTypeStep';
 import WaitStep from './WaitStep';
 import DownloadStep from './DownloadStep';
 import { createDownloadJob, getDownloadJob, getThumbnailLink } from './backend';
+import 'font-awesome-webpack';
 
 class App extends Component {
 
@@ -29,42 +30,51 @@ class App extends Component {
 
     onMediaTypeChange = mediaType => this.setState({mediaType});
 
+    startRequest = () => this.setState({requestInProgress: true, errorMessage: ''});
+
     fetchThumbnailLink = () => {
-        this.setState({requestInProgress: true, errorMessage: ''});
+        this.startRequest();
+
         getThumbnailLink()
-          .then(thumbnailLink => {
-              this.setState({thumbnailLink, step: 2});
-          })
+          .then(thumbnailLink => this.setState({requestInProgress: false, thumbnailLink, step: 2}))
           .catch(e => {
-              this.setState({requestInProgress: false, errorMessage: 'Could not validate URL, is it ok?'});
+              this.setState({requestInProgress: false, errorMessage: 'An error occured when checking URL. Is it correct?'});
               console.error(e);
           });
     };
 
     startPolling = () => {
+        this.startRequest();
+
         const timerId = setInterval(() => {
             getDownloadJob(this.state.jobId)
               .then(job => {
                   if (job.status === 'SUCCESS') {
                       clearInterval(timerId);
-                      this.setState({step: 4, downloadLink: 'TODO build download link from job id'})
+                      this.setState({step: 4, requestInProgress: false, downloadLink: 'TODO build download link from job id'})
+                  } else if (job.status === 'ERROR') {
+                      clearInterval(timerId);
+                      this.setState({requestInProgress: false, errorMessage: 'An error occured while downloading. Please try again.'});
                   }
               })
               .catch(e => {
-                  this.setState({requestInProgress: false, errorMessage: 'Could not validate URL, is it ok?'});
+                  clearInterval(timerId);
+                  this.setState({requestInProgress: false, errorMessage: 'An error occured while downloading. Please try again.'});
                   console.error(e);
               });
         }, 2000);
     };
 
     createJobAndStartPolling = () => {
+        this.startRequest();
+
         createDownloadJob(this.state.movieLink)
           .then(job => {
-              this.setState({requestInProgress: true, jobId: job.id, step: 3})
+              this.setState({requestInProgress: true, jobId: job.id, step: 3});
               this.startPolling();
           })
           .catch(e => {
-              this.setState({requestInProgress: false, errorMessage: 'Could not validate URL, is it ok?'});
+              this.setState({requestInProgress: false, errorMessage: 'An error occured while downloading. Please try again.'});
               console.error(e);
           });
     };
@@ -76,7 +86,7 @@ class App extends Component {
         if (this.state.step === 1) {
             view = (
               <LinkStep
-                movieLink={this.props.movieLink}
+                movieLink={this.state.movieLink}
                 onMovieLinkChange={this.onMovieLinkChange}
                 requestInProgress={this.state.requestInProgress}
                 onNext={this.fetchThumbnailLink}
@@ -89,19 +99,16 @@ class App extends Component {
                 mediaType={this.state.mediaType}
                 onMediaTypeChange={this.onMediaTypeChange}
                 onNext={this.createJobAndStartPolling}
+                requestInProgress={this.state.requestInProgress}
               />
             )
         } else if (this.state.step === 3) {
             view = <WaitStep/>;
         } else if (this.state.step === 4) {
-            view = (
-              <DownloadStep
-                downloadLink={this.state.downloadLink}
-              />
-            )
+            view = <DownloadStep downloadLink={this.state.downloadLink}/>;
         }
 
-        const errorPanel = (this.state.errorMessage !== '') && (
+        const errorPanel = this.state.errorMessage !== '' && (
           <Alert bsStyle="danger">
               <h4>{this.state.errorMessage}</h4>
           </Alert>
@@ -119,8 +126,10 @@ class App extends Component {
                       {view}
                   </Col>
               </Row>
-              <Row>
-                  {errorPanel}
+              <Row style={{marginTop: '10px'}}>
+                  <Col md={12}>
+                      {errorPanel}
+                  </Col>
               </Row>
           </Grid>
         );
