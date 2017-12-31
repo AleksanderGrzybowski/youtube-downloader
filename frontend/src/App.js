@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Alert, Col, Grid, Row } from 'react-bootstrap';
+import { Col, Grid, Row } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
 import LinkStep from './LinkStep';
 import MediaTypeStep from './MediaTypeStep';
@@ -7,6 +7,7 @@ import WaitStep from './WaitStep';
 import DownloadStep from './DownloadStep';
 import { createDownloadJob, getDownloadJob, getThumbnailLink } from './backend';
 import 'font-awesome-webpack';
+import ErrorPanel from './ErrorPanel';
 
 class App extends Component {
 
@@ -108,12 +109,6 @@ class App extends Component {
             view = <DownloadStep downloadLink={this.state.downloadLink}/>;
         }
 
-        const errorPanel = this.state.errorMessage !== '' && (
-          <Alert bsStyle="danger">
-              <h4>{this.state.errorMessage}</h4>
-          </Alert>
-        );
-
         return (
           <Grid>
               <Row>
@@ -128,7 +123,7 @@ class App extends Component {
               </Row>
               <Row style={{marginTop: '10px'}}>
                   <Col md={12}>
-                      {errorPanel}
+                      <ErrorPanel message={this.state.errorMessage}/>
                   </Col>
               </Row>
           </Grid>
