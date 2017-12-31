@@ -5,7 +5,7 @@ import LinkStep from './LinkStep';
 import MediaTypeStep from './MediaTypeStep';
 import WaitStep from './WaitStep';
 import DownloadStep from './DownloadStep';
-import { createDownloadJob, getDownloadJob, getThumbnailLink } from './backend';
+import { createDownloadJob, getDownloadJob, getThumbnailLink } from './backend/backend';
 import 'font-awesome-webpack';
 import ErrorPanel from './ErrorPanel';
 
