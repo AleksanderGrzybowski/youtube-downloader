@@ -1,24 +1,24 @@
+import backendUrl from './../backendUrl';
+import axios from 'axios';
+
 export function getThumbnailLink(movieLink) {
-    return new Promise(resolve => {
-        setTimeout(() => resolve("https://i.ytimg.com/vi/gGQ2xKSF5VA/maxresdefault.jpg"), 1000);
-    })
+    const params = new URLSearchParams();
+    params.append('url', movieLink);
+
+    return axios.get(`${backendUrl}/api/thumbnailUrl`, {params})
+      .then(({data}) => data.thumbnailUrl);
 }
 
-export function createDownloadJob(movieLink) {
-    return new Promise(resolve => {
-        setTimeout(() => resolve({
-            id: 1
-        }), 2000);
-    })
+export function createDownloadJob(youtubeUrl) {
+    return axios.post(`${backendUrl}/api/jobs`, {youtubeUrl})
+      .then(({data}) => data);
 }
 
 export function getDownloadJob(id) {
-    return new Promise(resolve => {
-        setTimeout(() => resolve({
-            id: 1,
-            url: "https://www.youtube.com/watch?v=gGQ2xKSF5VA",
-            filename: "/tmp/abcd.mp4",
-            status: 'SUCCESS'
-        }), 2000)
-    })
+    return axios.get(`${backendUrl}/api/jobs/${id}`)
+      .then(({data}) => data);
+}
+
+export function getDownloadLink(id) {
+    return `${backendUrl}/api/jobs/${id}/download`;
 }

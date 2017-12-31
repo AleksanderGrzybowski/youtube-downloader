@@ -5,7 +5,7 @@ import LinkStep from './LinkStep';
 import MediaTypeStep from './MediaTypeStep';
 import WaitStep from './WaitStep';
 import DownloadStep from './DownloadStep';
-import { createDownloadJob, getDownloadJob, getThumbnailLink } from './backend/backend';
+import { createDownloadJob, getDownloadJob, getThumbnailLink, getDownloadLink } from './backend/backend';
 import 'font-awesome-webpack';
 import ErrorPanel from './ErrorPanel';
 
@@ -36,7 +36,7 @@ class App extends Component {
     fetchThumbnailLink = () => {
         this.startRequest();
 
-        getThumbnailLink()
+        getThumbnailLink(this.state.movieLink)
           .then(thumbnailLink => this.setState({requestInProgress: false, thumbnailLink, step: 2}))
           .catch(e => {
               this.setState({requestInProgress: false, errorMessage: 'An error occured when checking URL. Is it correct?'});
@@ -52,7 +52,7 @@ class App extends Component {
               .then(job => {
                   if (job.status === 'SUCCESS') {
                       clearInterval(timerId);
-                      this.setState({step: 4, requestInProgress: false, downloadLink: 'TODO build download link from job id'})
+                      this.setState({step: 4, requestInProgress: false, downloadLink: getDownloadLink(this.state.jobId)})
                   } else if (job.status === 'ERROR') {
                       clearInterval(timerId);
                       this.setState({requestInProgress: false, errorMessage: 'An error occured while downloading. Please try again.'});

@@ -20,6 +20,7 @@ import java.util.Optional;
 @RestController
 @ResponseBody
 @RequestMapping("/api/")
+@CrossOrigin
 @RequiredArgsConstructor
 public class JobController {
     

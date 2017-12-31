@@ -1,9 +1,12 @@
+// noinspection JSUnusedGlobalSymbols
+
 export function getThumbnailLink() {
     return new Promise(resolve => {
         setTimeout(() => resolve("https://i.ytimg.com/vi/gGQ2xKSF5VA/maxresdefault.jpg"), 1000);
     })
 }
 
+// noinspection JSUnusedGlobalSymbols
 export function createDownloadJob() {
     return new Promise(resolve => {
         setTimeout(() => resolve({
@@ -12,6 +15,7 @@ export function createDownloadJob() {
     })
 }
 
+// noinspection JSUnusedGlobalSymbols
 export function getDownloadJob() {
     return new Promise(resolve => {
         setTimeout(() => resolve({
@@ -21,4 +25,9 @@ export function getDownloadJob() {
             status: 'SUCCESS'
         }), 2000)
     })
+}
+
+// noinspection JSUnusedGlobalSymbols
+export function getDownloadLink() {
+    return '/mockDownloadLink'
 }
