@@ -17,7 +17,7 @@ export function createDownloadJob() {
     return new Promise(resolve => {
         setTimeout(() => resolve({
             id: 1
-        }), 2000);
+        }), 1000);
     })
 }
 
@@ -29,7 +29,7 @@ export function getDownloadJob() {
             url: "https://www.youtube.com/watch?v=gGQ2xKSF5VA",
             filename: "/tmp/abcd.mp4",
             status: 'SUCCESS'
-        }), 2000)
+        }), 1000)
     })
 }
 
