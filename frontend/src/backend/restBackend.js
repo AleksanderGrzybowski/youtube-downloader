@@ -1,6 +1,11 @@
 import backendUrl from './../backendUrl';
 import axios from 'axios';
 
+export function healthcheck() {
+    return axios.get(`${backendUrl}/api/health`)
+      .then(({data}) => data);
+}
+
 export function getThumbnailLink(movieLink) {
     const params = new URLSearchParams();
     params.append('url', movieLink);

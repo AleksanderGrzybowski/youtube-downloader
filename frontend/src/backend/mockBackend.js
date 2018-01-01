@@ -1,5 +1,11 @@
 // noinspection JSUnusedGlobalSymbols
+export function healthcheck() {
+    return new Promise(resolve => {
+        setTimeout(() => resolve({status: 'UP'}), 1000);
+    })
+}
 
+// noinspection JSUnusedGlobalSymbols
 export function getThumbnailLink() {
     return new Promise(resolve => {
         setTimeout(() => resolve("https://i.ytimg.com/vi/gGQ2xKSF5VA/maxresdefault.jpg"), 1000);

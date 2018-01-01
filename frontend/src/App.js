@@ -5,7 +5,7 @@ import LinkStep from './LinkStep';
 import MediaTypeStep from './MediaTypeStep';
 import WaitStep from './WaitStep';
 import DownloadStep from './DownloadStep';
-import { createDownloadJob, getDownloadJob, getThumbnailLink, getDownloadLink } from './backend/backend';
+import { createDownloadJob, getDownloadJob, getDownloadLink, getThumbnailLink, healthcheck } from './backend/backend';
 import 'font-awesome-webpack';
 import ErrorPanel from './ErrorPanel';
 
@@ -16,6 +16,7 @@ class App extends Component {
 
         // noinspection JSUnusedGlobalSymbols
         this.state = {
+            backendHealthy: true,
             movieLink: '',
             thumbnailLink: '',
             mediaType: 'video',
@@ -25,6 +26,11 @@ class App extends Component {
             downloadLink: '',
             errorMessage: ''
         }
+    }
+
+    componentDidMount() {
+        healthcheck()
+          .catch(() => this.setState({backendHealthy: false}));
     }
 
     onMovieLinkChange = movieLink => this.setState({movieLink});
@@ -84,7 +90,9 @@ class App extends Component {
     render() {
         let view;
 
-        if (this.state.step === 1) {
+        if (!this.state.backendHealthy) {
+            view = <ErrorPanel message="Server inaccessible. Please try again later."/>
+        } else if (this.state.step === 1) {
             view = (
               <LinkStep
                 movieLink={this.state.movieLink}
