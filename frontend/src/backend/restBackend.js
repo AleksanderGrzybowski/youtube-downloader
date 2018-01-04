@@ -14,8 +14,8 @@ export function getThumbnailLink(movieLink) {
       .then(({data}) => data.thumbnailUrl);
 }
 
-export function createDownloadJob(youtubeUrl) {
-    return axios.post(`${backendUrl}/api/jobs`, {youtubeUrl})
+export function createDownloadJob(youtubeUrl, type) {
+    return axios.post(`${backendUrl}/api/jobs`, {youtubeUrl, type: type.toUpperCase()})
       .then(({data}) => data);
 }
 

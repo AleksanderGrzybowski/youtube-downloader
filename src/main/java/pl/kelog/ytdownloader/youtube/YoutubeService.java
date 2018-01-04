@@ -49,14 +49,16 @@ public class YoutubeService {
         return url;
     }
     
-    public DownloadJobDto beginDownload(String youtubeMovieLink) {
+    public DownloadJobDto beginDownload(String youtubeMovieLink, DownloadJob.Type type) {
         DownloadJob job = downloadJobRepository.create();
         job.setUrl(youtubeMovieLink);
+        job.setType(type);
         job.setStatus(Status.PENDING);
         
+        String extension = type == DownloadJob.Type.VIDEO ? "mp4" : "mp3";
         String downloadedVideoFilename = Paths.get(
                 appConfiguration.getStoragePath(),
-                job.getId() + "-" + randomAlphanumeric(10) + ".mp4"
+                job.getId() + "-" + randomAlphanumeric(10) + "." + extension
         ).toAbsolutePath().toString();
         job.setFilename(downloadedVideoFilename);
         
@@ -69,9 +71,8 @@ public class YoutubeService {
     }
     
     
-    
     private static DownloadJobDto mapToDto(DownloadJob job) {
-        return new DownloadJobDto(job.getId(), job.getUrl(), job.getFilename(), job.getStatus());
+        return new DownloadJobDto(job.getId(), job.getUrl(), job.getType(), job.getFilename(), job.getStatus());
     }
     
     public Optional<DownloadJobDto> findOne(int id) {

@@ -75,7 +75,7 @@ class App extends Component {
     createJobAndStartPolling = () => {
         this.startRequest();
 
-        createDownloadJob(this.state.movieLink)
+        createDownloadJob(this.state.movieLink, this.state.mediaType)
           .then(job => {
               this.setState({requestInProgress: true, jobId: job.id, step: 3});
               this.startPolling();

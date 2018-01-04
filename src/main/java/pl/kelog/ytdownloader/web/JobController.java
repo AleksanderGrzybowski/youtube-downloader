@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.kelog.ytdownloader.common.DownloadJobDto;
 import pl.kelog.ytdownloader.job.DownloadJob.Status;
+import pl.kelog.ytdownloader.job.DownloadJob.Type;
 import pl.kelog.ytdownloader.youtube.YoutubeService;
 
 import javax.servlet.http.HttpServletResponse;
@@ -24,7 +25,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class JobController {
     
-    private static final String DOWNLOAD_FILENAME = "download.mp4";
+    private static final String DOWNLOAD_FILENAME_VIDEO = "download.mp4";
+    private static final String DOWNLOAD_FILENAME_AUDIO = "download.mp3";
     
     private final YoutubeService youtubeService;
     
@@ -37,7 +39,7 @@ public class JobController {
     
     @RequestMapping(value = "/jobs", method = RequestMethod.POST)
     public DownloadJobDto beginDownload(@RequestBody YoutubeUrlDto dto) {
-        return youtubeService.beginDownload(dto.youtubeUrl);
+        return youtubeService.beginDownload(dto.youtubeUrl, dto.type);
     }
     
     @RequestMapping(
@@ -50,7 +52,8 @@ public class JobController {
         Optional<DownloadJobDto> dto = youtubeService.findOne(id);
         
         if (dto.isPresent() && dto.get().status == Status.SUCCESS) {
-            response.setHeader("Content-Disposition", "attachment; filename=" + DOWNLOAD_FILENAME);
+            String filename = dto.get().type == Type.VIDEO ? DOWNLOAD_FILENAME_VIDEO : DOWNLOAD_FILENAME_AUDIO;
+            response.setHeader("Content-Disposition", "attachment; filename=" + filename);
             return new ResponseEntity<>(toResource(dto.get()), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -66,5 +69,6 @@ public class JobController {
     @NoArgsConstructor
     private static class YoutubeUrlDto {
         String youtubeUrl;
+        Type type;
     }
 }

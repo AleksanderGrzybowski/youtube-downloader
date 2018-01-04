@@ -8,6 +8,8 @@ import pl.kelog.ytdownloader.AppConfiguration;
 import pl.kelog.ytdownloader.job.DownloadJob;
 import pl.kelog.ytdownloader.job.DownloadJob.Status;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -27,17 +29,18 @@ public class AsyncYoutubeDownloader {
     @Async
     public CompletableFuture<Void> beginDownload(DownloadJob jobInfo) {
         try {
-            List<String> command = asList(
-                    appConfiguration.getYoutubeDlPath(),
-                    jobInfo.getUrl(),
-                    "-o",
-                    jobInfo.getFilename()
-            );
+            List<String> command = createCommand(jobInfo);
             log.info("Starting download process " + jobInfo + ", command: " + command + "...");
             Process process = new ProcessBuilder(command).start();
             
             process.waitFor();
             ensureSuccessExitCode(process);
+            
+            // youtube-dl duplicates extensions, sorry
+            if (jobInfo.getType() == DownloadJob.Type.AUDIO) {
+                //noinspection ResultOfMethodCallIgnored
+                new File(jobInfo.getFilename() + ".mp3").renameTo(new File(jobInfo.getFilename()));
+            }
             
             jobInfo.setStatus(Status.SUCCESS);
             log.info("Download successful: " + jobInfo + ".");
@@ -47,5 +50,25 @@ public class AsyncYoutubeDownloader {
         }
         
         return CompletableFuture.completedFuture(null);
+    }
+    
+    private List<String> createCommand(DownloadJob jobInfo) {
+        List<String> command = new ArrayList<>(asList(
+                appConfiguration.getYoutubeDlPath(),
+                jobInfo.getUrl(),
+                "-o",
+                jobInfo.getFilename()
+        ));
+        
+        if (jobInfo.getType() == DownloadJob.Type.AUDIO) {
+            command.addAll(asList(
+                    "-x",
+                    "-f",
+                    "bestvideo+bestaudio",
+                    "--audio-format=mp3"
+            ));
+        }
+        
+        return command;
     }
 }
