@@ -6,7 +6,6 @@ import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 
@@ -17,8 +16,6 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 public class AppConfiguration {
     
     private static final String CHECK_STORAGE_TEST_STRING = "test creating file";
-    private static final String YOUTUBE_DL_EXECUTABLE = "youtube-dl";
-    private static final String DEFAULT_STORAGE_PATH = "/tmp";
     
     @Getter
     private final String youtubeDlPath;
@@ -27,13 +24,13 @@ public class AppConfiguration {
     private final String storagePath;
     
     public AppConfiguration(
-            @Value("${app.youtubeDlPath:#{null}}") String youtubeDlPath,
-            @Value("${app.storagePath:#{null}}") String storagePath
+            @Value("${app.youtubeDlPath}") String youtubeDlPath,
+            @Value("${app.storagePath}") String storagePath
     ) {
-        this.youtubeDlPath = (youtubeDlPath == null) ? YOUTUBE_DL_EXECUTABLE : youtubeDlPath;
+        this.youtubeDlPath = youtubeDlPath;
         ensureYoutubeDlIsPresent();
         
-        this.storagePath = (storagePath == null) ? DEFAULT_STORAGE_PATH : storagePath;
+        this.storagePath = storagePath;
         ensureStorageDirectoryIsWritable();
     }
     
@@ -42,11 +39,11 @@ public class AppConfiguration {
         
         try {
             FileUtils.writeStringToFile(
-                    Paths.get(storagePath, randomAlphanumeric(10) + ".mp4").toFile(),
+                    Paths.get(storagePath, randomAlphanumeric(10) + ".txt").toFile(),
                     CHECK_STORAGE_TEST_STRING,
                     StandardCharsets.UTF_8
             );
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.severe("Error while writing test file to storage path: " + e.getMessage());
             throw new RuntimeException(e);
         }

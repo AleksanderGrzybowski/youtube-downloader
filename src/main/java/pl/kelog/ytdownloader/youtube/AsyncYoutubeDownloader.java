@@ -37,20 +37,31 @@ public class AsyncYoutubeDownloader {
             process.waitFor();
             ensureSuccessExitCode(process);
             
-            // youtube-dl duplicates extensions, sorry
-            if (jobInfo.getType() == DownloadJobType.AUDIO) {
-                //noinspection ResultOfMethodCallIgnored
-                new File(jobInfo.getFilename() + ".mp3").renameTo(new File(jobInfo.getFilename()));
-            }
+            fixExtensionIfNeeded(jobInfo);
             
             jobInfo.setStatus(DownloadJobStatus.SUCCESS);
             log.info("Download successful: " + jobInfo + ".");
+            logFileSize(jobInfo.getFilename());
         } catch (Exception e) {
             jobInfo.setStatus(DownloadJobStatus.ERROR);
             log.severe("Download error: " + jobInfo + ". " + e.getMessage());
         }
         
-        return CompletableFuture.completedFuture(null);
+        return CompletableFuture.completedFuture(null); // not used
+    }
+    
+    private void logFileSize(String filename) {
+        log.info("Downloaded file " + filename + " has " + new File(filename).length() + " bytes.");
+    }
+    
+    /**
+     * youtube-dl duplicates extensions when extracting audio
+     */
+    private void fixExtensionIfNeeded(DownloadJob jobInfo) {
+        if (jobInfo.getType() == DownloadJobType.AUDIO) {
+            //noinspection ResultOfMethodCallIgnored
+            new File(jobInfo.getFilename() + ".mp3").renameTo(new File(jobInfo.getFilename()));
+        }
     }
     
     private List<String> createCommand(DownloadJob jobInfo) {
@@ -62,12 +73,7 @@ public class AsyncYoutubeDownloader {
         ));
         
         if (jobInfo.getType() == DownloadJobType.AUDIO) {
-            command.addAll(asList(
-                    "-x",
-                    "-f",
-                    "bestvideo+bestaudio",
-                    "--audio-format=mp3"
-            ));
+            command.addAll(asList("-x", "-f", "bestvideo+bestaudio", "--audio-format=mp3"));
         }
         
         return command;

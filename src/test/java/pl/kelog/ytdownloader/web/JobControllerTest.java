@@ -16,8 +16,7 @@ import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 public class JobControllerTest {
@@ -33,7 +32,13 @@ public class JobControllerTest {
     
     @Test
     public void should_list_details_of_a_job() throws Exception {
-        DownloadJobDto dto = new DownloadJobDto(1, "http://link.com", DownloadJobType.VIDEO, "/tmp/abcd.mp4", DownloadJobStatus.PENDING);
+        DownloadJobDto dto = new DownloadJobDto(
+                1,
+                "http://link.com",
+                DownloadJobType.VIDEO,
+                "/tmp/abcd.mp4",
+                DownloadJobStatus.PENDING
+        );
         when(service.findOne(1)).thenReturn(Optional.of(dto));
         
         mockMvc.perform(get("/api/jobs/1"))
@@ -76,27 +81,18 @@ public class JobControllerTest {
     }
     
     @Test
-    public void should_return_404_if_there_is_no_such_job_for_file_download() throws Exception {
-        when(service.findOne(1)).thenReturn(Optional.empty());
-        
-        mockMvc.perform(get("/api/jobs/1/download"))
-                .andExpect(status().isNotFound());
-    }
-    
-    @Test
     public void should_return_404_if_there_is_no_fully_downloaded_file_yet_or_error() throws Exception {
         when(service.findOne(1)).thenReturn(Optional.empty());
-        
-        mockMvc.perform(get("/api/jobs/1/download"))
-                .andExpect(status().isNotFound());
+        getJobAndAssert404();
         
         when(service.findOne(1)).thenReturn(Optional.of(createDownloadJobDto(DownloadJobStatus.PENDING)));
-        
-        mockMvc.perform(get("/api/jobs/1/download"))
-                .andExpect(status().isNotFound());
+        getJobAndAssert404();
         
         when(service.findOne(1)).thenReturn(Optional.of(createDownloadJobDto(DownloadJobStatus.ERROR)));
-        
+        getJobAndAssert404();
+    }
+    
+    private void getJobAndAssert404() throws Exception {
         mockMvc.perform(get("/api/jobs/1/download"))
                 .andExpect(status().isNotFound());
     }
@@ -106,10 +102,11 @@ public class JobControllerTest {
         when(service.findOne(1)).thenReturn(Optional.of(createDownloadJobDto(DownloadJobStatus.SUCCESS)));
         
         mockMvc.perform(get("/api/jobs/1/download"))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Disposition", "attachment; filename=abcd.mp4"));
     }
     
     private static DownloadJobDto createDownloadJobDto(DownloadJobStatus error) {
-        return new DownloadJobDto(1, "", DownloadJobType.VIDEO, "", error);
+        return new DownloadJobDto(1, "", DownloadJobType.VIDEO, "/tmp/abcd.mp4", error);
     }
 }

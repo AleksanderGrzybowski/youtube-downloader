@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -24,9 +25,6 @@ import java.util.Optional;
 @CrossOrigin
 @RequiredArgsConstructor
 public class JobController {
-    
-    private static final String DOWNLOAD_FILENAME_VIDEO = "download.mp4";
-    private static final String DOWNLOAD_FILENAME_AUDIO = "download.mp3";
     
     private final YoutubeService youtubeService;
     
@@ -51,13 +49,19 @@ public class JobController {
     public ResponseEntity<FileSystemResource> getFile(@PathVariable("id") int id, HttpServletResponse response) {
         Optional<DownloadJobDto> dto = youtubeService.findOne(id);
         
-        if (dto.isPresent() && dto.get().status == DownloadJobStatus.SUCCESS) {
-            String filename = dto.get().type == DownloadJobType.VIDEO ? DOWNLOAD_FILENAME_VIDEO : DOWNLOAD_FILENAME_AUDIO;
-            response.setHeader("Content-Disposition", "attachment; filename=" + filename);
-            return new ResponseEntity<>(toResource(dto.get()), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        if (dto.isPresent()) {
+            DownloadJobDto job = dto.get();
+            if (job.status == DownloadJobStatus.SUCCESS) {
+                setAttachmentHeader(response, FilenameUtils.getName(job.getFilename()));
+                return new ResponseEntity<>(toResource(job), HttpStatus.OK);
+            }
         }
+        
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+    
+    private void setAttachmentHeader(HttpServletResponse response, String filename) {
+        response.setHeader("Content-Disposition", "attachment; filename=" + filename);
     }
     
     private FileSystemResource toResource(DownloadJobDto downloadJobDto) {
