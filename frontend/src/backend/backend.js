@@ -2,4 +2,4 @@
 
 import { healthcheck, createDownloadJob, getDownloadJob, getThumbnailLink, getDownloadLink } from './restBackend';
 
-export { healthcheck, getDownloadJob, createDownloadJob, getThumbnailLink, getDownloadLink };
+export { healthcheck, createDownloadJob, getDownloadJob, getThumbnailLink, getDownloadLink };

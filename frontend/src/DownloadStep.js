@@ -4,9 +4,7 @@ import { Button, Glyphicon } from 'react-bootstrap';
 export default function DownloadStep({downloadLink}) {
     return (
       <div>
-          <h1 className="text-center">
-              Done!
-          </h1>
+          <h1 className="text-center">Done!</h1>
           <Button
             bsStyle="success"
             bsSize="large"

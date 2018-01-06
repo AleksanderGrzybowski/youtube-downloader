@@ -14,7 +14,6 @@ class App extends Component {
     constructor(props) {
         super(props);
 
-        // noinspection JSUnusedGlobalSymbols
         this.state = {
             backendHealthy: true,
             movieLink: '',
@@ -29,8 +28,7 @@ class App extends Component {
     }
 
     componentDidMount() {
-        healthcheck()
-          .catch(() => this.setState({backendHealthy: false}));
+        healthcheck().catch(() => this.setState({backendHealthy: false}));
     }
 
     onMovieLinkChange = movieLink => this.setState({movieLink});
@@ -44,12 +42,21 @@ class App extends Component {
 
         getThumbnailLink(this.state.movieLink)
           .then(thumbnailLink => this.setState({requestInProgress: false, thumbnailLink, step: 2}))
-          .catch(e => {
-              this.setState({requestInProgress: false, errorMessage: 'An error occured when checking URL. Is it correct?'});
-              console.error(e);
-          });
+          .catch(() => this.setState({requestInProgress: false, errorMessage: 'An error occured when checking URL. Is it correct?'}));
     };
 
+
+    createJobAndStartPolling = () => {
+        this.startRequest();
+
+        createDownloadJob(this.state.movieLink, this.state.mediaType)
+          .then(job => {
+              this.setState({requestInProgress: true, jobId: job.id, step: 3});
+              this.startPolling();
+          })
+          .catch(() => this.setState({requestInProgress: false, errorMessage: 'An error occured while downloading. Please try again.'}));
+    };
+    
     startPolling = () => {
         this.startRequest();
 
@@ -64,35 +71,20 @@ class App extends Component {
                       this.setState({requestInProgress: false, errorMessage: 'An error occured while downloading. Please try again.'});
                   }
               })
-              .catch(e => {
+              .catch(() => {
                   clearInterval(timerId);
                   this.setState({requestInProgress: false, errorMessage: 'An error occured while downloading. Please try again.'});
-                  console.error(e);
               });
         }, 2000);
     };
 
-    createJobAndStartPolling = () => {
-        this.startRequest();
-
-        createDownloadJob(this.state.movieLink, this.state.mediaType)
-          .then(job => {
-              this.setState({requestInProgress: true, jobId: job.id, step: 3});
-              this.startPolling();
-          })
-          .catch(e => {
-              this.setState({requestInProgress: false, errorMessage: 'An error occured while downloading. Please try again.'});
-              console.error(e);
-          });
-    };
-
-
     render() {
         let view;
-
+        const {step} = this.state;
+        
         if (!this.state.backendHealthy) {
             view = <ErrorPanel message="Server inaccessible. Please try again later."/>
-        } else if (this.state.step === 1) {
+        } else if (step === 1) {
             view = (
               <LinkStep
                 movieLink={this.state.movieLink}
@@ -101,7 +93,7 @@ class App extends Component {
                 onNext={this.fetchThumbnailLink}
               />
             )
-        } else if (this.state.step === 2) {
+        } else if (step === 2) {
             view = (
               <MediaTypeStep
                 thumbnailLink={this.state.thumbnailLink}
@@ -111,9 +103,9 @@ class App extends Component {
                 requestInProgress={this.state.requestInProgress}
               />
             )
-        } else if (this.state.step === 3) {
+        } else if (step === 3) {
             view = <WaitStep/>;
-        } else if (this.state.step === 4) {
+        } else if (step === 4) {
             view = <DownloadStep downloadLink={this.state.downloadLink}/>;
         }
 
