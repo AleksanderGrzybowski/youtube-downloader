@@ -6,7 +6,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import pl.kelog.ytdownloader.AppConfiguration;
 import pl.kelog.ytdownloader.job.DownloadJob;
-import pl.kelog.ytdownloader.job.DownloadJob.Status;
+import pl.kelog.ytdownloader.job.DownloadJobStatus;
+import pl.kelog.ytdownloader.job.DownloadJobType;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -37,15 +38,15 @@ public class AsyncYoutubeDownloader {
             ensureSuccessExitCode(process);
             
             // youtube-dl duplicates extensions, sorry
-            if (jobInfo.getType() == DownloadJob.Type.AUDIO) {
+            if (jobInfo.getType() == DownloadJobType.AUDIO) {
                 //noinspection ResultOfMethodCallIgnored
                 new File(jobInfo.getFilename() + ".mp3").renameTo(new File(jobInfo.getFilename()));
             }
             
-            jobInfo.setStatus(Status.SUCCESS);
+            jobInfo.setStatus(DownloadJobStatus.SUCCESS);
             log.info("Download successful: " + jobInfo + ".");
         } catch (Exception e) {
-            jobInfo.setStatus(Status.ERROR);
+            jobInfo.setStatus(DownloadJobStatus.ERROR);
             log.severe("Download error: " + jobInfo + ". " + e.getMessage());
         }
         
@@ -60,7 +61,7 @@ public class AsyncYoutubeDownloader {
                 jobInfo.getFilename()
         ));
         
-        if (jobInfo.getType() == DownloadJob.Type.AUDIO) {
+        if (jobInfo.getType() == DownloadJobType.AUDIO) {
             command.addAll(asList(
                     "-x",
                     "-f",

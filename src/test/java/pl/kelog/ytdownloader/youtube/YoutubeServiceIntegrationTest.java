@@ -8,8 +8,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.DigestUtils;
 import pl.kelog.ytdownloader.common.DownloadJobDto;
-import pl.kelog.ytdownloader.job.DownloadJob;
-import pl.kelog.ytdownloader.job.DownloadJob.Status;
+import pl.kelog.ytdownloader.job.DownloadJobStatus;
+import pl.kelog.ytdownloader.job.DownloadJobType;
 
 import java.io.File;
 
@@ -37,15 +37,15 @@ public class YoutubeServiceIntegrationTest {
     
     @Test
     public void should_download_a_sample_movie_as_video() throws Exception {
-        DownloadJobDto jobDto = service.beginDownload(YOUTUBE_TEST_MOVIE_URL, DownloadJob.Type.VIDEO);
+        DownloadJobDto jobDto = service.beginDownload(YOUTUBE_TEST_MOVIE_URL, DownloadJobType.VIDEO);
         
-        assertThat(jobDto.getStatus()).isEqualTo(Status.PENDING);
+        assertThat(jobDto.getStatus()).isEqualTo(DownloadJobStatus.PENDING);
     
         loopWhileStatusPending(jobDto);
         
-        assertThat(jobDto.getStatus() == Status.SUCCESS);
+        assertThat(jobDto.getStatus() == DownloadJobStatus.SUCCESS);
         assertThat(jobDto.getFilename()).isNotNull();
-        assertThat(jobDto.getType()).isEqualTo(DownloadJob.Type.VIDEO);
+        assertThat(jobDto.getType()).isEqualTo(DownloadJobType.VIDEO);
         File downloaded = new File(jobDto.getFilename());
         assertThat(downloaded.exists()).isTrue();
         assertThat(DigestUtils.md5DigestAsHex(FileUtils.readFileToByteArray(downloaded)))
@@ -54,15 +54,15 @@ public class YoutubeServiceIntegrationTest {
     
     @Test
     public void should_download_a_sample_movie_as_audio() throws Exception {
-        DownloadJobDto jobDto = service.beginDownload(YOUTUBE_TEST_MOVIE_URL, DownloadJob.Type.AUDIO);
+        DownloadJobDto jobDto = service.beginDownload(YOUTUBE_TEST_MOVIE_URL, DownloadJobType.AUDIO);
         
-        assertThat(jobDto.getStatus()).isEqualTo(Status.PENDING);
+        assertThat(jobDto.getStatus()).isEqualTo(DownloadJobStatus.PENDING);
         
         loopWhileStatusPending(jobDto);
         
-        assertThat(jobDto.getStatus() == Status.SUCCESS);
+        assertThat(jobDto.getStatus() == DownloadJobStatus.SUCCESS);
         assertThat(jobDto.getFilename()).isNotNull();
-        assertThat(jobDto.getType()).isEqualTo(DownloadJob.Type.AUDIO);
+        assertThat(jobDto.getType()).isEqualTo(DownloadJobType.AUDIO);
         File downloaded = new File(jobDto.getFilename());
         assertThat(downloaded.exists()).isTrue();
         assertThat(DigestUtils.md5DigestAsHex(FileUtils.readFileToByteArray(downloaded)))
@@ -71,19 +71,19 @@ public class YoutubeServiceIntegrationTest {
     
     @Test
     public void should_fail_on_downloading_invalid_link() throws Exception {
-        DownloadJobDto jobDto = service.beginDownload("http://google.com", DownloadJob.Type.VIDEO);
+        DownloadJobDto jobDto = service.beginDownload("http://google.com", DownloadJobType.VIDEO);
         
-        assertThat(jobDto.getStatus()).isEqualTo(Status.PENDING);
+        assertThat(jobDto.getStatus()).isEqualTo(DownloadJobStatus.PENDING);
         
         loopWhileStatusPending(jobDto);
         
-        assertThat(jobDto.getStatus() == Status.ERROR);
+        assertThat(jobDto.getStatus() == DownloadJobStatus.ERROR);
     }
     
     private void loopWhileStatusPending(DownloadJobDto jobDto) throws InterruptedException {
         int sleepCounter = 0;
         int countLimit = 10;
-        while (sleepCounter++ < countLimit && jobDto.getStatus() == Status.PENDING) {
+        while (sleepCounter++ < countLimit && jobDto.getStatus() == DownloadJobStatus.PENDING) {
             //noinspection ConstantConditions
             jobDto = service.findOne(jobDto.getId()).get();
             System.out.println(".");

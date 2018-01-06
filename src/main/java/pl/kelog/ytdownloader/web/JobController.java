@@ -10,8 +10,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.kelog.ytdownloader.common.DownloadJobDto;
-import pl.kelog.ytdownloader.job.DownloadJob.Status;
-import pl.kelog.ytdownloader.job.DownloadJob.Type;
+import pl.kelog.ytdownloader.job.DownloadJobStatus;
+import pl.kelog.ytdownloader.job.DownloadJobType;
 import pl.kelog.ytdownloader.youtube.YoutubeService;
 
 import javax.servlet.http.HttpServletResponse;
@@ -51,8 +51,8 @@ public class JobController {
     public ResponseEntity<FileSystemResource> getFile(@PathVariable("id") int id, HttpServletResponse response) {
         Optional<DownloadJobDto> dto = youtubeService.findOne(id);
         
-        if (dto.isPresent() && dto.get().status == Status.SUCCESS) {
-            String filename = dto.get().type == Type.VIDEO ? DOWNLOAD_FILENAME_VIDEO : DOWNLOAD_FILENAME_AUDIO;
+        if (dto.isPresent() && dto.get().status == DownloadJobStatus.SUCCESS) {
+            String filename = dto.get().type == DownloadJobType.VIDEO ? DOWNLOAD_FILENAME_VIDEO : DOWNLOAD_FILENAME_AUDIO;
             response.setHeader("Content-Disposition", "attachment; filename=" + filename);
             return new ResponseEntity<>(toResource(dto.get()), HttpStatus.OK);
         } else {
@@ -69,6 +69,6 @@ public class JobController {
     @NoArgsConstructor
     private static class YoutubeUrlDto {
         String youtubeUrl;
-        Type type;
+        DownloadJobType type;
     }
 }

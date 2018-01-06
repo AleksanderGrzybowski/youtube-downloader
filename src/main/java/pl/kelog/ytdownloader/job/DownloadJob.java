@@ -9,15 +9,8 @@ public class DownloadJob {
     
     private int id;
     private String url;
-    private Type type;
+    private DownloadJobType type;
     private String filename;
-    private Status status;
+    private DownloadJobStatus status;
     
-    public enum Status {
-        PENDING, ERROR, SUCCESS
-    }
-    
-    public enum Type {
-        VIDEO, AUDIO
-    }
 }

@@ -6,8 +6,9 @@ import org.springframework.stereotype.Service;
 import pl.kelog.ytdownloader.AppConfiguration;
 import pl.kelog.ytdownloader.common.DownloadJobDto;
 import pl.kelog.ytdownloader.job.DownloadJob;
-import pl.kelog.ytdownloader.job.DownloadJob.Status;
+import pl.kelog.ytdownloader.job.DownloadJobStatus;
 import pl.kelog.ytdownloader.job.DownloadJobRepository;
+import pl.kelog.ytdownloader.job.DownloadJobType;
 import pl.kelog.ytdownloader.util.Utils;
 
 import java.nio.charset.Charset;
@@ -49,13 +50,13 @@ public class YoutubeService {
         return url;
     }
     
-    public DownloadJobDto beginDownload(String youtubeMovieLink, DownloadJob.Type type) {
+    public DownloadJobDto beginDownload(String youtubeMovieLink, DownloadJobType type) {
         DownloadJob job = downloadJobRepository.create();
         job.setUrl(youtubeMovieLink);
         job.setType(type);
-        job.setStatus(Status.PENDING);
+        job.setStatus(DownloadJobStatus.PENDING);
         
-        String extension = type == DownloadJob.Type.VIDEO ? "mp4" : "mp3";
+        String extension = type == DownloadJobType.VIDEO ? "mp4" : "mp3";
         String downloadedVideoFilename = Paths.get(
                 appConfiguration.getStoragePath(),
                 job.getId() + "-" + randomAlphanumeric(10) + "." + extension
