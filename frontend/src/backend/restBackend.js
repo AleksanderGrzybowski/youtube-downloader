@@ -1,5 +1,7 @@
-import backendUrl from './../backendUrl';
 import axios from 'axios';
+
+// you can override for quick testing
+const backendUrl = '';
 
 export function healthcheck() {
     return axios.get(`${backendUrl}/api/health`)

@@ -1,0 +1,20 @@
+version: '2'
+services:
+  frontend:
+    image: ytdownloader-frontend
+    build: frontend
+    restart: always
+      
+  backend:
+    image: ytdownloader-backend
+    build: .
+    environment:
+      - APP_YOUTUBEDLPATH=/usr/local/bin/youtube-dl
+    restart: always
+      
+  nginx:
+    image: ytdownloader-nginx
+    build: nginx
+    ports:
+      - 127.0.0.1:51916:80
+    restart: always
