@@ -2,7 +2,6 @@ package pl.kelog.ytdownloader.web;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +29,6 @@ public class ThumbnailController {
     
     @Data
     @AllArgsConstructor
-    @NoArgsConstructor
     private static class ThumbnailUrlDto {
         String thumbnailUrl;
     }

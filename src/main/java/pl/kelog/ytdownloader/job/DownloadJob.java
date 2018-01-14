@@ -12,5 +12,4 @@ public class DownloadJob {
     private DownloadJobType type;
     private String filename;
     private DownloadJobStatus status;
-    
 }

@@ -22,7 +22,7 @@ public class YtdownloaderApplication {
         executor.setCorePoolSize(10);
         executor.setMaxPoolSize(10);
         executor.setQueueCapacity(500);
-        executor.setThreadNamePrefix("spring-async-ex-");
+        executor.setThreadNamePrefix("ytdl-async-");
         executor.initialize();
         return executor;
     }

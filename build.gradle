@@ -28,10 +28,9 @@ test {
 dependencies {
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.springframework.boot:spring-boot-starter-actuator')
-    runtime('com.h2database:h2')
-    compileOnly('org.projectlombok:lombok')
     testCompile('org.springframework.boot:spring-boot-starter-test')
-    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
-    compile group: 'commons-io', name: 'commons-io', version: '2.6'
-
+    
+    compileOnly('org.projectlombok:lombok')
+    compile('org.apache.commons:commons-lang3:3.7')
+    compile('commons-io:commons-io:2.6')
 }
